@@ -34,31 +34,31 @@ function timeWait(milliSecondes) {
   });
 }
 
+// 获取页面总数
+async function getNum() {
+let httpUrl = "https://sobooks.cc/page/1";
+  res = await axios.get(httpUrl);
+  let $ = cheerio.load(res.data);
+  let allNum = $(".content .pagination li:last-child").text().slice(2, -2);
+  return allNum;
+}
+
 async function spider() {
   // 获取所有的页面总数
   let allPageNum = await getNum();
-  for (let i = 1; i <= allPageNum; i++) {
-    await timeWait(3000 * i); //i 是每个页面循环等待时间
-  
-    // getListPage(i);
+  // console.log(allPageNum)
+  for (let i = 1; i <= allPageNum.length; i++) {
+    await timeWait(15000 * i); //i 是每个页面循环等待时间
+    getPageUrl(i);
   }
 }
 
-// 获取页面总数
-async function getNum() {
-  res = await axios.get(httpUrl);
-  let $ = cheerio.load(res.data);
-  let btnLength = $(".pagination li").length;
-  let allNum = $(".pagination li")
-    .eq(btnLength - 2)
-    .find("a")
-    .text();
-  return allNum;
-}
+
 
 // 获取第N个页面所有书籍的链接
 async function getPageUrl(num) {
   let httpUrl = "https://sobooks.cc/page/" + num;
+  console.log(httpUrl)
   let res = await axios.get(httpUrl);
   // 测试请求资源
   //  console.log( res.data)
@@ -66,10 +66,10 @@ async function getPageUrl(num) {
   $("#cardslist .card-item .thumb-img>a").each((i, ele) => {
     let href = $(ele).attr("href");
     console.log(i);
+    timeWait(8000);
     console.log(href);
     // 根据地质访问书籍详情页面
-    timeWait(5000);
-    getBookInfo(href);
+    // getBookInfo(href);
   });
 }
 
@@ -105,18 +105,18 @@ async function getBookInfo(href) {
   // 详情
   let brief = $(".article-content").html();
   let bookUrl = href;
-  console.log(
-    bookname,
-    author,
-    formspecif,
-    tag,
-    pubtime,
-    score,
-    pubcompany,
-    cataory,
-    brief,
-    bookUrl
-  );
+  // console.log(
+  //   bookname,
+  //   author,
+  //   formspecif,
+  //   tag,
+  //   pubtime,
+  //   score,
+  //   pubcompany,
+  //   cataory,
+  //   brief,
+  //   bookUrl
+  // );
   let arr = [
     bookname,
     author,
@@ -134,18 +134,14 @@ async function getBookInfo(href) {
     "insert into book (  bookname,author,formspecif,tag,pubtime,score,pubcompany,bookimg,cataory,brief,bookUrl) values(?,?,?,?,?,?,?,?,?,?,?)";
   console.log(arr);
   con.query(strSql, arr, (err, results) => {
-    console.log(err);
-    console.log(results);
+    // console.log(err);
+    // console.log(results);
   });
 }
 
-// 二维码验证
-async function tdcode(code) {
-  let res = await axios.get(code);
-  let $ = cheerio.load(res.data);
-}
+
 
 spider()
-getPageUrl(page);
+// getPageUrl(page);
 // let tempBook = "https://sobooks.cc/books/17589.html";
 // getBookInfo(tempBook);
